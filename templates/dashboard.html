@@ -1,0 +1,429 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Quantum Edge — AI Trading Terminal</title>
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@300;400;500;600;700&family=Space+Grotesk:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<style>
+:root{--b0:#06070b;--b1:#0d0e16;--b2:#13141e;--b3:#1b1c2a;--b4:#242538;--br:#272a44;--brh:#3d4170;--t1:#e8eaf3;--t2:#8f92aa;--t3:#5c5f78;--g:#00e68a;--gd:#00e68a22;--r:#ff4757;--rd:#ff475722;--bl:#4da6ff;--bld:#4da6ff22;--am:#ffb347;--amd:#ffb34722;--pu:#a78bfa;--pud:#a78bfa22;--rad:10px}
+*,*::before,*::after{margin:0;padding:0;box-sizing:border-box}
+body{font-family:'Space Grotesk',system-ui,sans-serif;background:var(--b0);color:var(--t1);min-height:100vh;overflow-x:hidden}
+body::before{content:'';position:fixed;inset:0;background:radial-gradient(ellipse at 20% 0%,#00e68a06,transparent 55%),radial-gradient(ellipse at 80% 100%,#4da6ff06,transparent 55%);pointer-events:none;z-index:0}
+::-webkit-scrollbar{width:5px}::-webkit-scrollbar-track{background:var(--b0)}::-webkit-scrollbar-thumb{background:var(--brh);border-radius:3px}
+.m{font-family:'JetBrains Mono',monospace}
+a{color:var(--bl);text-decoration:none}
+
+/* HEADER */
+header{position:sticky;top:0;z-index:100;background:var(--b0)ee;border-bottom:1px solid var(--br);backdrop-filter:blur(16px)}
+.hdr{max-width:1540px;margin:0 auto;display:flex;align-items:center;justify-content:space-between;height:56px;padding:0 24px}
+.logo{display:flex;align-items:center;gap:10px}
+.logo b{width:30px;height:30px;background:linear-gradient(135deg,var(--g),var(--bl));border-radius:8px;display:grid;place-items:center;font-size:14px;color:var(--b0);font-family:'JetBrains Mono',monospace}
+.logo span{font-size:15px;font-weight:600;letter-spacing:-.3px}
+.logo small{color:var(--t3);font-weight:400;font-size:11px;margin-left:5px}
+.hdr-r{display:flex;align-items:center;gap:16px}
+.pill{display:flex;align-items:center;gap:6px;padding:4px 12px;border-radius:16px;font-size:11px;font-weight:500;font-family:'JetBrains Mono',monospace;background:var(--gd);color:var(--g);border:1px solid var(--g)44}
+.pill .dot{width:6px;height:6px;border-radius:50%;background:var(--g);animation:pul 2s ease-in-out infinite}
+@keyframes pul{0%,100%{opacity:1}50%{opacity:.4}}
+#clock{font-family:'JetBrains Mono',monospace;font-size:12px;color:var(--t3)}
+
+/* MAIN */
+main{position:relative;z-index:1;max-width:1540px;margin:0 auto;padding:20px 24px 40px}
+
+/* KPI ROW */
+.kpis{display:grid;grid-template-columns:repeat(6,1fr);gap:14px;margin-bottom:22px}
+.kpi{background:var(--b2);border:1px solid var(--br);border-radius:var(--rad);padding:16px 18px;transition:all .25s;position:relative;overflow:hidden}
+.kpi::after{content:'';position:absolute;top:0;left:0;right:0;height:2px;background:linear-gradient(90deg,var(--g),var(--bl));opacity:0;transition:opacity .25s}
+.kpi:hover{border-color:var(--brh);transform:translateY(-2px)}.kpi:hover::after{opacity:1}
+.kpi label{display:block;font-size:10px;font-weight:500;color:var(--t3);text-transform:uppercase;letter-spacing:.8px;margin-bottom:6px}
+.kpi .v{font-family:'JetBrains Mono',monospace;font-size:22px;font-weight:600}
+.kpi .sub{font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--t2);margin-top:3px}
+.up{color:var(--g)}.dn{color:var(--r)}.nu{color:var(--t1)}
+
+/* GRID */
+.grid{display:grid;grid-template-columns:1fr 380px;gap:20px}
+.card{background:var(--b2);border:1px solid var(--br);border-radius:12px;overflow:hidden}
+.card-h{display:flex;align-items:center;justify-content:space-between;padding:16px 20px;border-bottom:1px solid var(--br)}
+.card-t{font-size:14px;font-weight:600;display:flex;align-items:center;gap:8px}
+.card-b{padding:16px 20px}
+.side{display:flex;flex-direction:column;gap:20px}
+
+/* SIGNAL FEED */
+.feed{max-height:520px;overflow-y:auto;padding:8px 20px}
+.sig{display:flex;gap:12px;padding:14px 0;border-bottom:1px solid var(--br);animation:sIn .3s ease-out}
+.sig:last-child{border-bottom:none}
+@keyframes sIn{from{opacity:0;transform:translateX(-8px)}to{opacity:1;transform:translateX(0)}}
+.sig-i{width:34px;height:34px;border-radius:50%;display:grid;place-items:center;font-size:15px;flex-shrink:0}
+.sig-i.ok{background:var(--gd);color:var(--g);box-shadow:0 0 16px var(--gd)}
+.sig-i.no{background:var(--rd);color:var(--r);box-shadow:0 0 16px var(--rd)}
+.sig-c{flex:1;min-width:0}
+.sig-top{display:flex;align-items:center;gap:8px;margin-bottom:3px}
+.sig-tk{font-family:'JetBrains Mono',monospace;font-weight:600;font-size:14px}
+.sig-act{font-family:'JetBrains Mono',monospace;font-size:10px;font-weight:600;padding:2px 7px;border-radius:4px;text-transform:uppercase}
+.sig-act.buy{background:var(--gd);color:var(--g)}.sig-act.sell{background:var(--rd);color:var(--r)}
+.sig-pr{font-family:'JetBrains Mono',monospace;font-size:12px;color:var(--t2)}
+.sig-d{font-size:11px;color:var(--t2);line-height:1.5;margin-top:5px}
+.sig-m{display:flex;gap:14px;flex-wrap:wrap;margin-top:6px}
+.sig-m span{font-family:'JetBrains Mono',monospace;font-size:10px;color:var(--t3)}
+.sig-m span em{color:var(--t2);font-style:normal;font-weight:500}
+.sig-time{font-family:'JetBrains Mono',monospace;font-size:10px;color:var(--t3);white-space:nowrap;margin-left:auto;flex-shrink:0}
+.empty-feed{text-align:center;padding:60px 20px;color:var(--t3);font-size:13px}
+.empty-feed .ico{font-size:36px;margin-bottom:12px;opacity:.4}
+
+/* METRICS */
+.mgrid{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.mi{background:var(--b3);border-radius:8px;padding:12px}
+.mi label{font-size:9px;color:var(--t3);text-transform:uppercase;letter-spacing:.7px;display:block;margin-bottom:4px}
+.mi .v{font-family:'JetBrains Mono',monospace;font-size:17px;font-weight:600}
+
+/* ACTIONS */
+.acts{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.act{background:var(--b3);border:1px solid var(--br);border-radius:8px;padding:13px;cursor:pointer;transition:all .2s;font-family:'Space Grotesk',sans-serif;color:var(--t1);text-align:center;font-size:12px;font-weight:500}
+.act:hover{border-color:var(--brh);background:var(--b4);transform:translateY(-1px)}
+.act.pri{background:var(--gd);border-color:var(--g)55;color:var(--g)}
+.act.pri:hover{box-shadow:0 0 20px var(--gd)}
+.act .ic{display:block;font-size:18px;margin-bottom:4px}
+
+/* SIMULATOR */
+.sim{display:flex;flex-direction:column;gap:10px}
+.sim-row{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.sim-row.full{grid-template-columns:1fr}
+.field{display:flex;flex-direction:column;gap:4px}
+.field label{font-size:10px;color:var(--t3);text-transform:uppercase;letter-spacing:.6px}
+.field input,.field select{background:var(--b3);border:1px solid var(--br);border-radius:6px;padding:9px 12px;color:var(--t1);font-family:'JetBrains Mono',monospace;font-size:12px;outline:none;transition:border-color .2s}
+.field input:focus,.field select:focus{border-color:var(--bl)}
+.field select{cursor:pointer;-webkit-appearance:none}
+.sim-btn{background:linear-gradient(135deg,var(--g),var(--bl));border:none;border-radius:8px;padding:12px;color:var(--b0);font-family:'Space Grotesk',sans-serif;font-size:13px;font-weight:600;cursor:pointer;transition:all .2s;margin-top:4px}
+.sim-btn:hover{transform:translateY(-1px);box-shadow:0 4px 20px var(--gd)}
+.sim-btn:disabled{opacity:.5;cursor:not-allowed;transform:none;box-shadow:none}
+
+/* RESULT PANEL */
+.result{background:var(--b3);border-radius:8px;padding:16px;margin-top:10px;display:none;animation:sIn .3s ease-out}
+.result.show{display:block}
+.result-hdr{display:flex;align-items:center;gap:8px;margin-bottom:10px;font-weight:600;font-size:14px}
+.result-hdr.approved{color:var(--g)}.result-hdr.rejected{color:var(--r)}
+.result-body{font-size:12px;color:var(--t2);line-height:1.7}
+.result-body .row{display:flex;justify-content:space-between;padding:3px 0;border-bottom:1px solid var(--br)22}
+.result-body .row:last-child{border:none}
+.result-body .row span:last-child{font-family:'JetBrains Mono',monospace;font-weight:500;color:var(--t1)}
+.tag{display:inline-block;font-size:10px;padding:2px 8px;border-radius:4px;font-family:'JetBrains Mono',monospace;font-weight:600;margin-left:4px}
+.tag.ok{background:var(--gd);color:var(--g)}.tag.no{background:var(--rd);color:var(--r)}.tag.warn{background:var(--amd);color:var(--am)}
+
+/* SETTINGS MODAL */
+.modal-bg{position:fixed;inset:0;background:#00000088;z-index:200;display:none;place-items:center;backdrop-filter:blur(4px)}
+.modal-bg.open{display:grid}
+.modal{background:var(--b2);border:1px solid var(--br);border-radius:14px;padding:28px;width:440px;max-width:92vw;animation:sIn .25s ease-out}
+.modal h3{font-size:16px;font-weight:600;margin-bottom:16px}
+.modal .field{margin-bottom:10px}
+.modal-acts{display:flex;gap:10px;margin-top:16px}
+.modal-acts button{flex:1;padding:10px;border-radius:8px;border:1px solid var(--br);background:var(--b3);color:var(--t1);font-family:'Space Grotesk',sans-serif;font-size:13px;font-weight:500;cursor:pointer;transition:all .2s}
+.modal-acts button:hover{border-color:var(--brh)}
+.modal-acts button.save{background:var(--gd);border-color:var(--g)55;color:var(--g)}
+
+/* RESPONSIVE */
+@media(max-width:1100px){.grid{grid-template-columns:1fr}.kpis{grid-template-columns:repeat(3,1fr)}}
+@media(max-width:640px){.kpis{grid-template-columns:repeat(2,1fr)}.hdr{padding:0 14px}main{padding:14px}}
+</style>
+</head>
+<body>
+
+<header>
+<div class="hdr">
+    <div class="logo">
+        <b>QE</b>
+        <span>Quantum Edge<small>AI Trading v1.0</small></span>
+    </div>
+    <div class="hdr-r">
+        <div class="pill"><div class="dot"></div>SYSTEM ONLINE</div>
+        <div id="clock" class="m"></div>
+    </div>
+</div>
+</header>
+
+<main>
+    <!-- KPIs -->
+    <div class="kpis" id="kpis">
+        <div class="kpi"><label>Capital Total</label><div class="v nu m" id="k-capital">$100,000</div><div class="sub">disponible</div></div>
+        <div class="kpi"><label>Señales Procesadas</label><div class="v nu m" id="k-signals">0</div><div class="sub" id="k-signals-sub">esperando...</div></div>
+        <div class="kpi"><label>Aprobadas</label><div class="v up m" id="k-approved">0</div><div class="sub" id="k-rate">0% tasa</div></div>
+        <div class="kpi"><label>Rechazadas</label><div class="v dn m" id="k-rejected">0</div><div class="sub">por risk engine</div></div>
+        <div class="kpi"><label>Win Rate (ML)</label><div class="v m" id="k-winrate" style="color:var(--bl)">—</div><div class="sub">modelo predictivo</div></div>
+        <div class="kpi"><label>Posiciones Abiertas</label><div class="v nu m" id="k-positions">0</div><div class="sub" id="k-maxpos">máx 10</div></div>
+    </div>
+
+    <!-- MAIN GRID -->
+    <div class="grid">
+        <!-- SIGNAL FEED -->
+        <div class="card">
+            <div class="card-h">
+                <div class="card-t">📡 Signal Feed — Tiempo Real</div>
+                <span class="m" style="font-size:11px;color:var(--t3)" id="feed-count">0 señales</span>
+            </div>
+            <div class="feed" id="feed">
+                <div class="empty-feed">
+                    <div class="ico">📡</div>
+                    Esperando señales de TradingView...<br>
+                    <span style="font-size:11px;color:var(--t3);margin-top:6px;display:inline-block">
+                        Usá el simulador →  o enviá un webhook a <span class="m">/webhook</span>
+                    </span>
+                </div>
+            </div>
+        </div>
+
+        <!-- SIDEBAR -->
+        <div class="side">
+            <!-- ML MODEL -->
+            <div class="card">
+                <div class="card-h"><div class="card-t">🧠 Modelo ML</div><span class="m" style="font-size:10px;color:var(--t3)" id="ml-ver">v1.0</span></div>
+                <div class="card-b">
+                    <div class="mgrid" id="ml-metrics">
+                        <div class="mi"><label>AUC-ROC</label><div class="v" id="m-auc">—</div></div>
+                        <div class="mi"><label>Precisión</label><div class="v" id="m-prec">—</div></div>
+                        <div class="mi"><label>CV AUC (μ)</label><div class="v" id="m-cv">—</div></div>
+                        <div class="mi"><label>F1 Score</label><div class="v" id="m-f1">—</div></div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- QUICK ACTIONS -->
+            <div class="card">
+                <div class="card-h"><div class="card-t">⚡ Acciones</div></div>
+                <div class="card-b">
+                    <div class="acts">
+                        <div class="act pri" onclick="retrainModel()"><span class="ic">🔄</span>Re-entrenar ML</div>
+                        <div class="act" onclick="openSettings()"><span class="ic">⚙️</span>Parámetros</div>
+                        <div class="act" onclick="refreshStatus()"><span class="ic">📊</span>Refresh Status</div>
+                        <div class="act" onclick="clearFeed()"><span class="ic">🗑️</span>Limpiar Feed</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- SIMULATOR -->
+            <div class="card">
+                <div class="card-h"><div class="card-t">🧪 Simulador de Señales</div></div>
+                <div class="card-b">
+                    <div class="sim">
+                        <div class="sim-row">
+                            <div class="field"><label>Ticker</label><input type="text" id="sim-ticker" value="AAPL" placeholder="AAPL"></div>
+                            <div class="field"><label>Acción</label><select id="sim-action"><option value="BUY">BUY</option><option value="SELL">SELL</option></select></div>
+                        </div>
+                        <div class="sim-row">
+                            <div class="field"><label>Precio</label><input type="number" id="sim-price" value="185.50" step="0.01"></div>
+                            <div class="field"><label>Timeframe</label><select id="sim-tf"><option value="1H">1H</option><option value="4H">4H</option><option value="D" selected>Daily</option><option value="W">Weekly</option></select></div>
+                        </div>
+                        <div class="sim-row">
+                            <div class="field"><label>RSI</label><input type="number" id="sim-rsi" value="45" step="0.1"></div>
+                            <div class="field"><label>Vol Ratio</label><input type="number" id="sim-vol" value="1.5" step="0.1"></div>
+                        </div>
+                        <button class="sim-btn" id="sim-go" onclick="simulate()">⚡ Simular Señal</button>
+                        <div class="result" id="sim-result"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</main>
+
+<!-- SETTINGS MODAL -->
+<div class="modal-bg" id="settings-modal">
+<div class="modal">
+    <h3>⚙️ Parámetros de Riesgo</h3>
+    <div class="field"><label>Capital Total ($)</label><input type="number" id="s-capital" value="100000"></div>
+    <div class="field"><label>Riesgo Máx por Trade (%)</label><input type="number" id="s-risk" value="2" step="0.1"></div>
+    <div class="field"><label>Ratio Riesgo/Beneficio Mín</label><input type="number" id="s-rr" value="2" step="0.1"></div>
+    <div class="field"><label>Correlación Máx Portfolio</label><input type="number" id="s-corr" value="0.85" step="0.01"></div>
+    <div class="field"><label>Posiciones Máx Abiertas</label><input type="number" id="s-maxpos" value="10"></div>
+    <div class="field"><label>Probabilidad Mín Win (%)</label><input type="number" id="s-minwin" value="65"></div>
+    <div class="modal-acts">
+        <button onclick="closeSettings()">Cancelar</button>
+        <button class="save" onclick="saveSettings()">Guardar</button>
+    </div>
+</div>
+</div>
+
+<script>
+const API = window.location.origin;
+let signals = [];
+
+// ── CLOCK ──
+function updateClock(){
+    const now=new Date();
+    document.getElementById('clock').textContent=now.toLocaleString('en-US',{hour:'2-digit',minute:'2-digit',second:'2-digit',hour12:false})+' UTC';
+}
+setInterval(updateClock,1000);updateClock();
+
+// ── FETCH STATUS ──
+async function refreshStatus(){
+    try{
+        const r=await fetch(API+'/api/status');
+        const d=await r.json();
+        const s=d.stats, p=d.portfolio, m=d.model_metrics||{};
+        document.getElementById('k-capital').textContent='$'+Number(p.total_capital||100000).toLocaleString();
+        document.getElementById('k-signals').textContent=s.total_signals;
+        document.getElementById('k-signals-sub').textContent=s.last_signal_time?'última: '+new Date(s.last_signal_time).toLocaleTimeString():'esperando...';
+        document.getElementById('k-approved').textContent=s.approved_signals;
+        document.getElementById('k-rate').textContent=s.total_signals>0?Math.round(s.approved_signals/s.total_signals*100)+'% tasa':'0% tasa';
+        document.getElementById('k-rejected').textContent=s.rejected_signals;
+        document.getElementById('k-positions').textContent=p.open_positions||0;
+        document.getElementById('k-maxpos').textContent='máx '+10;
+        if(m.auc_roc){
+            document.getElementById('m-auc').textContent=(m.auc_roc).toFixed(4);
+            document.getElementById('m-prec').textContent=(m.precision||0).toFixed(4);
+            document.getElementById('m-cv').textContent=(m.cv_auc_mean||0).toFixed(4);
+            document.getElementById('m-f1').textContent=(m.f1||0).toFixed(4);
+            document.getElementById('k-winrate').textContent=Math.round(m.accuracy*100)+'%';
+            document.getElementById('ml-ver').textContent=m.model_version||'v1.0';
+        }
+    }catch(e){console.error('Status fetch error:',e)}
+}
+
+// ── SIMULATE ──
+async function simulate(){
+    const btn=document.getElementById('sim-go');
+    btn.disabled=true;btn.textContent='⏳ Procesando...';
+    const payload={
+        ticker:document.getElementById('sim-ticker').value.toUpperCase(),
+        action:document.getElementById('sim-action').value,
+        price:parseFloat(document.getElementById('sim-price').value),
+        timeframe:document.getElementById('sim-tf').value,
+        strategy:'Manual_Simulation',
+        indicators:{rsi:parseFloat(document.getElementById('sim-rsi').value),volume_ratio:parseFloat(document.getElementById('sim-vol').value)},
+        secret:''
+    };
+    try{
+        const r=await fetch(API+'/webhook',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(payload)});
+        const d=await r.json();
+        const dec=d.decision;
+        showResult(dec);
+        addSignalToFeed(dec);
+        refreshStatus();
+    }catch(e){
+        showResultError(e.message);
+    }
+    btn.disabled=false;btn.textContent='⚡ Simular Señal';
+}
+
+function showResult(dec){
+    const el=document.getElementById('sim-result');
+    const ok=dec.approved;
+    const pred=dec.prediction||{};
+    const risk=dec.risk_assessment||{};
+    let html=`<div class="result-hdr ${ok?'approved':'rejected'}">${ok?'✅ APROBADA':'❌ RECHAZADA'} <span class="tag ${ok?'ok':'no'}">${pred.win_probability?(pred.win_probability*100).toFixed(1)+'%':'—'}</span></div>`;
+    html+=`<div class="result-body">`;
+    if(ok){
+        html+=`<div class="row"><span>Posición</span><span>${risk.position_shares||0} acciones ($${Number(risk.position_size||0).toLocaleString()})</span></div>`;
+        html+=`<div class="row"><span>Stop Loss</span><span>$${(risk.stop_loss||0).toFixed(2)}</span></div>`;
+        html+=`<div class="row"><span>Take Profit</span><span>$${(risk.take_profit||0).toFixed(2)}</span></div>`;
+        html+=`<div class="row"><span>R:R Ratio</span><span>${(risk.risk_reward_ratio||0).toFixed(1)}:1</span></div>`;
+        html+=`<div class="row"><span>Riesgo</span><span>$${Number(risk.risk_amount||0).toFixed(0)} (${((risk.risk_percent_of_capital||0)*100).toFixed(2)}%)</span></div>`;
+        html+=`<div class="row"><span>Señal</span><span>${pred.signal_strength||'—'} <span class="tag ${pred.signal_strength==='STRONG'?'ok':pred.signal_strength==='MODERATE'?'warn':'no'}">${pred.signal_strength}</span></span></div>`;
+        html+=`<div class="row"><span>Consenso Ensemble</span><span>${((pred.ensemble_agreement||0)*100).toFixed(0)}%</span></div>`;
+    }
+    if(dec.rejection_reasons&&dec.rejection_reasons.length>0){
+        html+=`<div style="margin-top:8px;padding:8px;background:var(--rd);border-radius:6px;font-size:11px;color:var(--r)">`;
+        dec.rejection_reasons.forEach(r=>html+=`• ${r}<br>`);
+        html+=`</div>`;
+    }
+    if(dec.warnings&&dec.warnings.length>0){
+        html+=`<div style="margin-top:6px;padding:8px;background:var(--amd);border-radius:6px;font-size:11px;color:var(--am)">`;
+        dec.warnings.forEach(w=>html+=`⚠ ${w}<br>`);
+        html+=`</div>`;
+    }
+    html+=`</div>`;
+    el.innerHTML=html;
+    el.classList.add('show');
+}
+
+function showResultError(msg){
+    const el=document.getElementById('sim-result');
+    el.innerHTML=`<div class="result-hdr rejected">❌ Error</div><div class="result-body">${msg}</div>`;
+    el.classList.add('show');
+}
+
+// ── SIGNAL FEED ──
+function addSignalToFeed(dec){
+    signals.unshift(dec);if(signals.length>50)signals.pop();
+    renderFeed();
+}
+
+function renderFeed(){
+    const el=document.getElementById('feed');
+    if(signals.length===0){el.innerHTML='<div class="empty-feed"><div class="ico">📡</div>Esperando señales...</div>';return;}
+    document.getElementById('feed-count').textContent=signals.length+' señales';
+    el.innerHTML=signals.map(s=>{
+        const ok=s.approved;
+        const pred=s.prediction||{};
+        const risk=s.risk_assessment||{};
+        const t=s.timestamp?new Date(s.timestamp).toLocaleTimeString():'';
+        return `<div class="sig">
+            <div class="sig-i ${ok?'ok':'no'}">${ok?'✓':'✗'}</div>
+            <div class="sig-c">
+                <div class="sig-top">
+                    <span class="sig-tk">${s.ticker}</span>
+                    <span class="sig-act ${s.action.toLowerCase()}">${s.action}</span>
+                    <span class="sig-pr">@ $${pred.win_probability?(Number(risk.stop_loss||0)>0?Number(document.getElementById('sim-price').value).toFixed(2):'—'):'—'}</span>
+                    <span class="sig-time">${t}</span>
+                </div>
+                <div class="sig-d">${s.reasoning||''}</div>
+                <div class="sig-m">
+                    <span>Win: <em>${pred.win_probability?(pred.win_probability*100).toFixed(1)+'%':'—'}</em></span>
+                    <span>R:R: <em>${(risk.risk_reward_ratio||0).toFixed(1)}:1</em></span>
+                    <span>Fuerza: <em>${pred.signal_strength||'—'}</em></span>
+                    ${s.features_summary?`<span>RSI: <em>${s.features_summary.rsi||'—'}</em></span>`:''}
+                    ${s.features_summary?`<span>Vol: <em>${s.features_summary.volume_ratio||'—'}x</em></span>`:''}
+                </div>
+            </div>
+        </div>`;
+    }).join('');
+}
+
+function clearFeed(){signals=[];renderFeed();document.getElementById('feed-count').textContent='0 señales';}
+
+// ── RETRAIN ──
+async function retrainModel(){
+    const btn=event.target.closest('.act');
+    btn.innerHTML='<span class="ic">⏳</span>Entrenando...';
+    try{
+        const r=await fetch(API+'/api/train',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({n_samples:5000,use_synthetic:true})});
+        const d=await r.json();
+        btn.innerHTML='<span class="ic">✅</span>Entrenado!';
+        refreshStatus();
+        setTimeout(()=>{btn.innerHTML='<span class="ic">🔄</span>Re-entrenar ML';},2000);
+    }catch(e){btn.innerHTML='<span class="ic">❌</span>Error';setTimeout(()=>{btn.innerHTML='<span class="ic">🔄</span>Re-entrenar ML';},2000);}
+}
+
+// ── SETTINGS ──
+function openSettings(){document.getElementById('settings-modal').classList.add('open');}
+function closeSettings(){document.getElementById('settings-modal').classList.remove('open');}
+async function saveSettings(){
+    const payload={
+        total_capital:parseFloat(document.getElementById('s-capital').value),
+        max_risk_per_trade:parseFloat(document.getElementById('s-risk').value)/100,
+        min_risk_reward:parseFloat(document.getElementById('s-rr').value),
+        max_correlation:parseFloat(document.getElementById('s-corr').value),
+        max_open_positions:parseInt(document.getElementById('s-maxpos').value),
+        min_win_probability:parseFloat(document.getElementById('s-minwin').value)/100,
+    };
+    try{
+        await fetch(API+'/api/settings',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(payload)});
+        closeSettings();refreshStatus();
+    }catch(e){alert('Error guardando: '+e.message);}
+}
+
+// Close modal on backdrop click
+document.getElementById('settings-modal').addEventListener('click',e=>{if(e.target===e.currentTarget)closeSettings();});
+
+// ── POLLING ──
+setInterval(async()=>{
+    try{
+        const r=await fetch(API+'/api/signals?limit=50');
+        const d=await r.json();
+        if(d.signals&&d.signals.length>signals.length){signals=d.signals;renderFeed();}
+    }catch(e){}
+},5000);
+
+// ── INIT ──
+refreshStatus();
+</script>
+</body>
+</html>
